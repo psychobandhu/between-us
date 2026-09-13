@@ -27,6 +27,7 @@
     <% } %>
 
     <!-- Welcoming Hero Banner -->
+    <!-- Welcoming Hero Banner -->
     <div class="hero-card">
       <div class="hero-badge">
         <span class="pulse-dot"></span> 100% Anonymous & Private
@@ -35,6 +36,18 @@
       <p class="hero-desc">
         Welcome to PsychoBandhu! Send anonymous text confessions or record private voice notes directly to the creator. No account or signup needed.
       </p>
+    </div>
+
+    <!-- Open Thoughts / Confessions Section (No question needed) -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1px solid rgba(56, 189, 248, 0.25); text-align: center; padding: 26px 20px; margin-bottom: 28px;">
+      <div style="font-size: 2.2rem; margin-bottom: 6px;">💭</div>
+      <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 6px;">Got something on your mind?</h3>
+      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 18px; max-width: 460px; margin-left: auto; margin-right: auto;">
+        Share an open thought, secret confession, or drop a voice note freely without answering a specific question.
+      </p>
+      <a href="/q/general" class="btn btn-primary" style="width: 100%; max-width: 380px; font-size: 1rem; padding: 12px 20px; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);">
+        Drop an Anonymous Thought / Voice Note →
+      </a>
     </div>
 
     <!-- Live Questions Section -->
@@ -51,7 +64,7 @@
               <div style="flex: 1;">
                 <div class="question-text"><%= q.text %></div>
                 <div class="question-subtext">
-                  <span><%= countsMap[q._id.toString()] || 0 %> replies received</span>
+                  <span><%= (typeof countsMap[q._id.toString()] === 'object' ? countsMap[q._id.toString()]?.total : countsMap[q._id.toString()]) || 0 %> replies received</span>
                   <span>•</span>
                   <span>Text & 60s Voice</span>
                 </div>
@@ -64,8 +77,8 @@
         </div>
       <% } else { %>
         <div class="card" style="text-align: center; padding: 30px 16px;">
-          <p style="color: var(--text-secondary); margin-bottom: 8px;">No active questions right now.</p>
-          <p style="font-size: 0.85rem; color: var(--text-secondary);">Check back soon for new anonymous prompts!</p>
+          <p style="color: var(--text-secondary); margin-bottom: 8px;">No specific questions right now.</p>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">You can still drop open thoughts using the section above!</p>
         </div>
       <% } %>
     </div>
@@ -79,11 +92,15 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 12px;">
-          <% featuredResponses.slice(0, 3).forEach(r => { %>
+          <% featuredResponses.slice(0, 4).forEach(r => { %>
             <div class="featured-card">
               <% if (r.questionId) { %>
                 <div class="featured-question-pill">
-                  <span>Q:</span> <%= r.questionId.text %>
+                  <% if (r.questionId.isGeneral || r.questionId.slug === 'general') { %>
+                    <span>💭</span> Open Thought
+                  <% } else { %>
+                    <span>Q:</span> <%= r.questionId.text %>
+                  <% } %>
                 </div>
               <% } %>
 

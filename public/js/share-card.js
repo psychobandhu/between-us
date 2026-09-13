@@ -16,8 +16,30 @@ window.generateStoryCard = async function(options) {
   const aText = card.querySelector('#story-answer-display');
   const footerHint = card.querySelector('.story-footer-hint');
 
-  if (options.isResponse) {
-    // Sharing a response (Question on top, Response below)
+  if (options.isGeneral) {
+    // Sharing an open thought: ONLY the reply box appears on the story!
+    qBox.style.display = 'none';
+    connector.style.display = 'none';
+    aBox.style.display = 'block';
+
+    if (options.isAudio) {
+      aTag.textContent = `🎙️ ANONYMOUS VOICE • ${options.audioDuration || 0}s`;
+      aText.innerHTML = `
+        <div class="story-voice-waveform">
+          <span>▶</span>
+          <span style="letter-spacing: 2px;">ılıılılı|lllı|lı</span>
+          <span style="font-size: 38px; color: #94a3b8;">${options.audioDuration || 0}s</span>
+        </div>
+      `;
+    } else {
+      aTag.textContent = '💭 ANONYMOUS THOUGHT';
+      aText.textContent = options.responseText || '';
+    }
+
+    footerHint.textContent = '🔗 Tap the link sticker to share your thoughts on PsychoBandhu';
+  } else if (options.isResponse) {
+    // Sharing a response with question on top
+    qBox.style.display = 'block';
     qTag.textContent = '💬 QUESTION';
     qText.textContent = options.questionText || '';
     connector.style.display = 'flex';
@@ -40,6 +62,7 @@ window.generateStoryCard = async function(options) {
     footerHint.textContent = '🔗 Tap the link sticker to reply on PsychoBandhu';
   } else {
     // Sharing just the Question (asking for replies)
+    qBox.style.display = 'block';
     qTag.textContent = '✨ ASK ME ANYTHING';
     qText.textContent = options.questionText || '';
     connector.style.display = 'none';

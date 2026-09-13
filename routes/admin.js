@@ -87,6 +87,7 @@ router.use(requireAdmin);
 // ----------------- Admin Dashboard -----------------
 router.get('/', async (req, res) => {
   try {
+    await Question.ensureGeneral();
     const questions = await Question.find().sort({ createdAt: -1 });
 
     // Compute response counts (total and unread) per question
@@ -340,7 +341,7 @@ router.get('/export', async (req, res) => {
     }
 
     const responses = await Response.find(filter)
-      .populate('questionId', 'text')
+      .populate('questionId', 'text slug isGeneral')
       .sort({ createdAt: -1 });
 
     const host = req.get('host');
@@ -352,7 +353,10 @@ router.get('/export', async (req, res) => {
       const created = new Date(r.createdAt);
       const dateStr = created.toISOString().slice(0, 10);
       const timeStr = created.toTimeString().slice(0, 8);
-      const questionText = r.questionId ? r.questionId.text : 'Deleted Question';
+      const isGeneral = r.questionId && (r.questionId.isGeneral || r.questionId.slug === 'general');
+      const questionText = r.questionId 
+        ? (isGeneral ? '💭 General Thoughts / Open Inbox' : r.questionId.text) 
+        : 'Deleted Question';
 
       let responseContent = '';
       if (r.type === 'text') {
@@ -362,8 +366,9 @@ router.get('/export', async (req, res) => {
       }
 
       return {
-        'Question': questionText,
-        'Type': r.type,
+        'Category': isGeneral ? 'Open Thought' : 'Question Reply',
+        'Question / Context': questionText,
+        'Type': r.type === 'audio' ? 'Voice Note' : 'Text Message',
         'Response Content / Audio Link': responseContent,
         'Date': dateStr,
         'Time': timeStr,
@@ -378,9 +383,10 @@ router.get('/export', async (req, res) => {
 
     // Auto-size columns slightly
     ws['!cols'] = [
-      { wch: 35 }, // Question
-      { wch: 10 }, // Type
-      { wch: 60 }, // Content / Audio
+      { wch: 16 }, // Category
+      { wch: 35 }, // Question / Context
+      { wch: 14 }, // Type
+      { wch: 65 }, // Content / Audio
       { wch: 12 }, // Date
       { wch: 10 }, // Time
       { wch: 10 }  // Featured

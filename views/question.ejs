@@ -35,8 +35,16 @@
 
     <!-- Question Prompt Sticker Card -->
     <div class="question-prompt-card">
-      <div class="prompt-tag">Anonymous Prompt</div>
-      <div class="prompt-main-text"><%= question.text %></div>
+      <% if (question.isGeneral || question.slug === 'general') { %>
+        <div class="prompt-tag" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">💭 Open Thoughts Inbox</div>
+        <div class="prompt-main-text">Share anything on your mind</div>
+        <p style="color: var(--text-secondary); font-size: 0.92rem; margin-top: 8px;">
+          Send candid confessions, thoughts, or voice notes freely without answering a specific question.
+        </p>
+      <% } else { %>
+        <div class="prompt-tag">Anonymous Prompt</div>
+        <div class="prompt-main-text"><%= question.text %></div>
+      <% } %>
     </div>
 
     <% if (typeof isArchived !== 'undefined' && isArchived) { %>

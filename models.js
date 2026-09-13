@@ -21,8 +21,28 @@ const QuestionSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  isGeneral: {
+    type: Boolean,
+    default: false
   }
 });
+
+QuestionSchema.statics.ensureGeneral = async function() {
+  let generalQ = await this.findOne({ slug: 'general' });
+  if (!generalQ) {
+    generalQ = await this.create({
+      text: 'General Thoughts',
+      slug: 'general',
+      isActive: true,
+      isGeneral: true
+    });
+  } else if (!generalQ.isGeneral) {
+    generalQ.isGeneral = true;
+    await generalQ.save();
+  }
+  return generalQ;
+};
 
 const ResponseSchema = new mongoose.Schema({
   questionId: {

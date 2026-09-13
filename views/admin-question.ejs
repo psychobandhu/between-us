@@ -24,8 +24,16 @@
 
     <!-- Question Overview Card -->
     <div class="card">
-      <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 4px;">QUESTION PROMPT</div>
-      <h2 style="font-size: 1.3rem; margin-bottom: 8px;"><%= question.text %></h2>
+      <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 4px;">
+        <%= (question.isGeneral || question.slug === 'general') ? 'INBOX TYPE' : 'QUESTION PROMPT' %>
+      </div>
+      <h2 style="font-size: 1.3rem; margin-bottom: 8px;">
+        <% if (question.isGeneral || question.slug === 'general') { %>
+          <span style="color: #38bdf8;">💭 Open Thoughts Inbox</span> (General Confessions)
+        <% } else { %>
+          <%= question.text %>
+        <% } %>
+      </h2>
       <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">
         Public Link: <a href="/q/<%= question.slug %>" target="_blank" style="color: var(--accent);"><%= baseUrl %>/q/<%= question.slug %></a>
         • Status: 
@@ -37,23 +45,27 @@
       </p>
 
       <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+        <% if (!question.isGeneral && question.slug !== 'general') { %>
+          <button 
+            type="button" 
+            class="btn btn-secondary btn-small"
+            onclick="downloadQuestionCard('<%= question.text.replace(/'/g, "\\'") %>', '<%= question.slug %>')">
+            📸 Download Question Story Card
+          </button>
+        <% } %>
         <button 
           type="button" 
           class="btn btn-secondary btn-small"
-          onclick="downloadQuestionCard('<%= question.text.replace(/'/g, "\\'") %>', '<%= question.slug %>')">
-          📸 Download Question Story Card
-        </button>
-        <button 
-          type="button" 
-          class="btn btn-secondary btn-small"
-          onclick="navigator.clipboard.writeText('<%= baseUrl %>/q/<%= question.slug %>'); alert('Question link copied!');">
+          onclick="navigator.clipboard.writeText('<%= baseUrl %>/q/<%= question.slug %>'); alert('Public link copied!');">
           📋 Copy Public Link
         </button>
-        <form action="/admin/questions/<%= question._id %>/toggle-active" method="POST" style="margin: 0;">
-          <button type="submit" class="btn btn-secondary btn-small">
-            <%= question.isActive !== false ? '📦 Archive Question' : '🚀 Make Live' %>
-          </button>
-        </form>
+        <% if (!question.isGeneral && question.slug !== 'general') { %>
+          <form action="/admin/questions/<%= question._id %>/toggle-active" method="POST" style="margin: 0;">
+            <button type="submit" class="btn btn-secondary btn-small">
+              <%= question.isActive !== false ? '📦 Archive Question' : '🚀 Make Live' %>
+            </button>
+          </form>
+        <% } %>
       </div>
     </div>
 
@@ -228,6 +240,7 @@
     function shareResponseCard(questionText, responseText, responseId, isAudio, audioDuration) {
       window.generateStoryCard({
         isResponse: true,
+        isGeneral: <%= (question.isGeneral || question.slug === 'general') ? 'true' : 'false' %>,
         questionText: questionText,
         responseText: responseText,
         isAudio: isAudio,

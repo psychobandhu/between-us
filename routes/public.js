@@ -9,11 +9,28 @@ const upload = multer({
   limits: { fileSize: 15 * 1024 * 1024 }
 });
 
+// Ensure permanent General Thoughts question exists
+async function ensureGeneralQuestion() {
+  try {
+    return await Question.ensureGeneral();
+  } catch (err) {
+    console.error('Error ensuring general question:', err.message);
+  }
+}
+
+// Shortcut to open thoughts inbox
+router.get('/general', async (req, res) => {
+  await ensureGeneralQuestion();
+  res.redirect('/q/general');
+});
+
 // Welcoming Homepage
 router.get('/', async (req, res) => {
   try {
-    // Fetch active questions
-    const activeQuestions = await Question.find({ isActive: true }).sort({ createdAt: -1 });
+    const generalQ = await ensureGeneralQuestion();
+
+    // Fetch active specific prompt questions (excluding general)
+    const activeQuestions = await Question.find({ isActive: true, slug: { $ne: 'general' } }).sort({ createdAt: -1 });
 
     // Fetch response counts for each question
     const questionStats = await Response.aggregate([
@@ -26,12 +43,13 @@ router.get('/', async (req, res) => {
 
     // Fetch recent featured responses to highlight on homepage
     const featuredResponses = await Response.find({ isFeatured: true })
-      .populate('questionId', 'text slug')
+      .populate('questionId', 'text slug isGeneral')
       .sort({ createdAt: -1 })
       .limit(6);
 
     res.render('index', { 
       pageTitle: 'PsychoBandhu — Between Us',
+      generalQ,
       activeQuestions,
       countsMap,
       featuredResponses,
@@ -41,6 +59,7 @@ router.get('/', async (req, res) => {
     console.error('Error loading homepage:', err);
     res.status(500).render('index', { 
       pageTitle: 'PsychoBandhu', 
+      generalQ: null,
       activeQuestions: [], 
       countsMap: {}, 
       featuredResponses: [], 
