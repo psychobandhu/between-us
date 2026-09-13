@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — PsychoBandhu</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <a href="/admin" class="brand">
+        <img src="/assets/logo.png" alt="PsychoBandhu" class="brand-logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <h1>PsychoBandhu</h1>
+          <div class="tagline">Admin Dashboard</div>
+        </div>
+      </a>
+      <div>
+        <a href="/admin/logout" class="btn btn-secondary btn-small">Logout</a>
+      </div>
+    </header>
+
+    <!-- Storage Usage Widget -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin-bottom: 0;">Database Storage (Atlas M0 512MB)</h3>
+        <span style="font-size: 0.85rem; color: var(--text-secondary);"><%= storage.usedMB %> MB / 512 MB (<%= storage.percentage %>%)</span>
+      </div>
+
+      <div class="storage-bar-container">
+        <div class="storage-bar-track">
+          <div 
+            class="storage-bar-fill <%= Number(storage.percentage) >= 90 ? 'crit' : (Number(storage.percentage) >= 80 ? 'warn' : '') %>" 
+            style="width: <%= Math.max(Number(storage.percentage), 1) %>%;">
+          </div>
+        </div>
+      </div>
+
+      <% if (storage.warning) { %>
+        <div class="alert <%= Number(storage.percentage) >= 90 ? 'alert-error' : 'alert-warning' %>" style="margin-top: 8px; margin-bottom: 0;">
+          <%= storage.warning %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- New Question Form -->
+    <div class="card">
+      <h2>Create a Question</h2>
+      <form action="/admin/questions" method="POST">
+        <input 
+          type="text" 
+          name="text" 
+          placeholder="e.g. Ask me anything anonymously, or send a secret voice note..." 
+          required 
+          maxlength="500"
+        >
+        <button type="submit" class="btn btn-primary">Create Question</button>
+      </form>
+    </div>
+
+    <!-- Banner if a question was just created -->
+    <% if (createdSlug) { %>
+      <% const recent = questions.find(q => q.slug === createdSlug); %>
+      <% if (recent) { %>
+        <div class="card" style="border-color: var(--accent); background: rgba(16, 185, 129, 0.08);">
+          <h3 style="color: var(--accent);">Question Created!</h3>
+          <p style="margin-bottom: 8px; font-size: 1.1rem; font-weight: 600;">"<%= recent.text %>"</p>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 14px;">
+            Link: <a href="/q/<%= recent.slug %>" target="_blank" style="color: var(--accent);"><%= baseUrl %>/q/<%= recent.slug %></a>
+          </p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button 
+              type="button" 
+              class="btn btn-primary btn-small"
+              onclick="downloadQuestionCard('<%= recent.text.replace(/'/g, "\\'") %>', '<%= recent.slug %>')">
+              📥 Download Instagram Story Card (PNG)
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-secondary btn-small"
+              onclick="navigator.clipboard.writeText('<%= baseUrl %>/q/<%= recent.slug %>'); alert('Link copied to clipboard!');">
+              📋 Copy Link
+            </button>
+          </div>
+        </div>
+      <% } %>
+    <% } %>
+
+    <!-- Questions List with Live/Archived Tabs -->
+    <% 
+      const liveQuestions = questions.filter(q => q.isActive !== false);
+      const archivedQuestions = questions.filter(q => q.isActive === false);
+    %>
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+        <h2>Questions (<%= questions.length %>)</h2>
+        <div style="display: flex; gap: 6px;">
+          <button type="button" class="btn btn-secondary btn-small filter-btn active" onclick="filterQuestions('all', this)">All (<%= questions.length %>)</button>
+          <button type="button" class="btn btn-secondary btn-small filter-btn" onclick="filterQuestions('live', this)">🟢 Live (<%= liveQuestions.length %>)</button>
+          <button type="button" class="btn btn-secondary btn-small filter-btn" onclick="filterQuestions('archived', this)">📁 Archived (<%= archivedQuestions.length %>)</button>
+        </div>
+      </div>
+
+      <% if (questions.length === 0) { %>
+        <p style="color: var(--text-secondary);">No questions yet. Create one above to get started.</p>
+      <% } else { %>
+        <div style="display: flex; flex-direction: column; gap: 14px;" id="questions-container">
+          <% questions.forEach(q => { %>
+            <div class="question-admin-item" data-status="<%= q.isActive !== false ? 'live' : 'archived' %>" style="background: var(--bg-card); border: 1px solid <%= q.isActive !== false ? 'var(--border)' : 'rgba(100, 116, 139, 0.25)' %>; border-radius: 8px; padding: 16px; opacity: <%= q.isActive !== false ? '1' : '0.85' %>;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <% if (q.isActive !== false) { %>
+                      <span style="background: rgba(16, 185, 129, 0.15); color: var(--accent); border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 700;">🟢 LIVE</span>
+                    <% } else { %>
+                      <span style="background: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.3); padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 700;">📁 ARCHIVED</span>
+                    <% } %>
+                    <span style="font-weight: 700; font-size: 1.05rem; word-break: break-word;"><%= q.text %></span>
+                  </div>
+                </div>
+                <% const qStats = countsMap[q._id.toString()] || { total: 0, unread: 0 }; %>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <% if (qStats.unread > 0) { %>
+                    <span style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">
+                      📬 <%= qStats.unread %> NEW
+                    </span>
+                  <% } %>
+                  <span style="background: var(--bg-primary); border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; white-space: nowrap;">
+                    <%= qStats.total %> total
+                  </span>
+                </div>
+              </div>
+
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px;">
+                URL: <a href="/q/<%= q.slug %>" target="_blank" style="color: var(--accent);"><%= baseUrl %>/q/<%= q.slug %></a>
+                • Created <%= new Date(q.createdAt).toLocaleDateString() %>
+              </div>
+
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <a href="/admin/questions/<%= q._id %>" class="btn btn-primary btn-small">
+                  View Answers (<%= qStats.total %>)
+                  <% if (qStats.unread > 0) { %>
+                    <span style="background: #38bdf8; color: #082f49; border-radius: 10px; padding: 1px 6px; font-size: 0.72rem; margin-left: 4px; font-weight: 800;"><%= qStats.unread %> NEW</span>
+                  <% } %>
+                </a>
+                
+                <!-- Archive / Unarchive Toggle -->
+                <form action="/admin/questions/<%= q._id %>/toggle-active" method="POST" style="margin: 0;">
+                  <button type="submit" class="btn btn-secondary btn-small" title="<%= q.isActive !== false ? 'Move away from live homepage' : 'Bring back to live homepage' %>">
+                    <%= q.isActive !== false ? '📦 Archive' : '🚀 Make Live' %>
+                  </button>
+                </form>
+
+                <button 
+                  type="button" 
+                  class="btn btn-secondary btn-small"
+                  onclick="downloadQuestionCard('<%= q.text.replace(/'/g, "\\'") %>', '<%= q.slug %>')">
+                  Story Card
+                </button>
+                <form action="/admin/questions/<%= q._id %>/delete" method="POST" style="margin: 0;" onsubmit="return confirm('Delete this question and all its answers? This can\'t be undone.');">
+                  <button type="submit" class="btn btn-danger btn-small">Delete</button>
+                </form>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+
+    <script>
+      function filterQuestions(status, btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.question-admin-item').forEach(item => {
+          if (status === 'all' || item.dataset.status === status) {
+            item.style.display = 'block';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      }
+    </script>
+
+    <!-- Export to Excel -->
+    <div class="card">
+      <h2>Export Responses to Excel</h2>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 14px;">
+        Download all responses as a formatted spreadsheet. Audio answers include direct download links.
+      </p>
+
+      <form action="/admin/export" method="GET" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div style="grid-column: span 2;">
+          <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">Filter by Question (Optional)</label>
+          <select name="questionId">
+            <option value="">All Questions</option>
+            <% questions.forEach(q => { %>
+              <option value="<%= q._id %>"><%= q.text.length > 50 ? q.text.substring(0, 50) + '...' : q.text %></option>
+            <% }); %>
+          </select>
+        </div>
+
+        <div>
+          <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">Date From</label>
+          <input type="date" name="dateFrom">
+        </div>
+
+        <div>
+          <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">Date To</label>
+          <input type="date" name="dateTo">
+        </div>
+
+        <div style="grid-column: span 2;">
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            📊 Download Excel Spreadsheet (.xlsx)
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hidden Story Card for html2canvas Rendering -->
+  <div id="story-card-render">
+    <div class="story-brand">
+      <img src="/assets/logo.png" class="story-logo" onerror="this.style.display='none'">
+      <div class="story-brand-info">
+        <div class="story-brand-title">PsychoBandhu</div>
+        <div class="story-brand-sub">Between Us • Anonymous Q&A</div>
+      </div>
+    </div>
+
+    <div class="story-center-container">
+      <div class="story-question-box" id="story-q-box">
+        <div class="story-box-header">
+          <span class="story-box-tag question-tag">✨ ASK ME ANYTHING</span>
+        </div>
+        <div class="story-question-text" id="story-question-display">
+          Ask me anything anonymously
+        </div>
+      </div>
+
+      <div class="story-connector" id="story-connector-arrow" style="display: none;">
+        <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <polyline points="19 12 12 19 5 12"></polyline>
+        </svg>
+      </div>
+
+      <div class="story-answer-box" id="story-a-box" style="display: none;">
+        <div class="story-box-header">
+          <span class="story-box-tag answer-tag" id="story-answer-tag">ANONYMOUS REPLY</span>
+        </div>
+        <div class="story-answer-text" id="story-answer-display"></div>
+      </div>
+    </div>
+
+    <div class="story-footer-card">
+      <div class="story-footer-hint">🔗 Tap the link sticker to reply anonymously</div>
+      <div class="story-footer-brand">psychobandhu.app</div>
+    </div>
+  </div>
+
+  <script src="/js/share-card.js"></script>
+  <script>
+    function downloadQuestionCard(questionText, slug) {
+      window.generateStoryCard({
+        isResponse: false,
+        questionText: questionText,
+        slug: slug,
+        filename: `psychobandhu-${slug}-question.png`
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle || 'PsychoBandhu — Between Us' %></title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header with only Brand & Featured shortcut (No prominent Admin button) -->
+    <header class="header">
+      <a href="/" class="brand">
+        <img src="/assets/logo.png" alt="PsychoBandhu" class="brand-logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <h1>PsychoBandhu</h1>
+          <div class="tagline">Between Us</div>
+        </div>
+      </a>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <a href="/featured" class="btn btn-secondary btn-small">★ Featured</a>
+      </div>
+    </header>
+
+    <% if (flashMessage) { %>
+      <div class="alert alert-warning"><%= flashMessage %></div>
+    <% } %>
+
+    <!-- Welcoming Hero Banner -->
+    <div class="hero-card">
+      <div class="hero-badge">
+        <span class="pulse-dot"></span> 100% Anonymous & Private
+      </div>
+      <h2>Speak Freely. Between Us.</h2>
+      <p class="hero-desc">
+        Welcome to PsychoBandhu! Send anonymous text confessions or record private voice notes directly to the creator. No account or signup needed.
+      </p>
+    </div>
+
+    <!-- Live Questions Section -->
+    <div style="margin-bottom: 28px;">
+      <div class="section-header">
+        <h3>🔥 Active Questions</h3>
+        <span style="font-size: 0.8rem; color: var(--text-secondary);">Tap to answer</span>
+      </div>
+
+      <% if (activeQuestions && activeQuestions.length > 0) { %>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <% activeQuestions.forEach(q => { %>
+            <a href="/q/<%= q.slug %>" class="question-list-card">
+              <div style="flex: 1;">
+                <div class="question-text"><%= q.text %></div>
+                <div class="question-subtext">
+                  <span><%= countsMap[q._id.toString()] || 0 %> replies received</span>
+                  <span>•</span>
+                  <span>Text & 60s Voice</span>
+                </div>
+              </div>
+              <div class="btn btn-primary btn-small" style="white-space: nowrap;">
+                Reply →
+              </div>
+            </a>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="card" style="text-align: center; padding: 30px 16px;">
+          <p style="color: var(--text-secondary); margin-bottom: 8px;">No active questions right now.</p>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">Check back soon for new anonymous prompts!</p>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Featured Responses Showcase -->
+    <% if (featuredResponses && featuredResponses.length > 0) { %>
+      <div style="margin-bottom: 28px;">
+        <div class="section-header">
+          <h3>✨ Featured Responses</h3>
+          <a href="/featured" style="font-size: 0.82rem; color: var(--accent); text-decoration: none;">View all →</a>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <% featuredResponses.slice(0, 3).forEach(r => { %>
+            <div class="featured-card">
+              <% if (r.questionId) { %>
+                <div class="featured-question-pill">
+                  <span>Q:</span> <%= r.questionId.text %>
+                </div>
+              <% } %>
+
+              <div class="response-header" style="margin-top: 6px;">
+                <span style="font-weight: 600; font-size: 0.82rem; color: <%= r.type === 'audio' ? '#38bdf8' : 'var(--accent)' %>;">
+                  <%= r.type === 'audio' ? '🎤 Anonymous Voice' : '💬 Anonymous Note' %>
+                </span>
+                <span style="font-size: 0.75rem; color: var(--text-secondary);">
+                  <%= new Date(r.createdAt).toLocaleDateString() %>
+                </span>
+              </div>
+
+              <% if (r.type === 'text') { %>
+                <div class="response-content" style="font-size: 0.98rem; margin: 8px 0;"><%= r.content %></div>
+              <% } else { %>
+                <div style="margin: 8px 0;">
+                  <audio controls preload="none" src="/api/responses/<%= r._id %>/audio"></audio>
+                </div>
+              <% } %>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Subtle, Low-Visibility Footer with Admin Login -->
+    <footer class="site-footer">
+      <div class="footer-links">
+        <span>© 2026 PsychoBandhu — Between Us</span>
+        <span>•</span>
+        <a href="/featured" class="footer-muted-link">Featured</a>
+        <span>•</span>
+        <!-- Very subtle, low-contrast admin login link -->
+        <a href="/admin/login" class="footer-admin-link" title="Creator Access">Admin</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login — PsychoBandhu</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container" style="max-width: 420px; margin-top: 60px;">
+    <header class="header" style="justify-content: center; text-align: center; border-bottom: none;">
+      <a href="/" class="brand" style="justify-content: center;">
+        <img src="/assets/logo.png" alt="PsychoBandhu" class="brand-logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <h1>PsychoBandhu</h1>
+          <div class="tagline">Between Us</div>
+        </div>
+      </a>
+    </header>
+
+    <div class="card">
+      <h2>Admin Login</h2>
+      <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 16px;">
+        Enter the admin password to access your dashboard.
+      </p>
+
+      <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+
+      <form action="/admin/login" method="POST">
+        <input 
+          type="password" 
+          name="password" 
+          placeholder="Enter password..." 
+          required 
+          autofocus
+        >
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Unlock Dashboard</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

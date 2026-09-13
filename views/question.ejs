@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= question.text %> — PsychoBandhu</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <a href="/" class="brand">
+        <img src="/assets/logo.png" alt="PsychoBandhu" class="brand-logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <h1>PsychoBandhu</h1>
+          <div class="tagline">Between Us</div>
+        </div>
+      </a>
+      <span class="prompt-tag" style="margin-bottom: 0;">
+        🔒 100% Anonymous
+      </span>
+    </header>
+
+    <% if (successMessage) { %>
+      <div class="alert alert-success" style="text-align: center; padding: 24px 16px;">
+        <div style="font-size: 2.2rem; margin-bottom: 6px;">🎉</div>
+        <h3 style="margin-bottom: 4px; font-size: 1.2rem;">Message Sent!</h3>
+        <p style="color: var(--text-secondary); font-size: 0.92rem;"><%= successMessage %></p>
+        <div style="margin-top: 16px; display: flex; justify-content: center; gap: 10px;">
+          <a href="/q/<%= question.slug %>" class="btn btn-secondary btn-small">Send Another</a>
+          <a href="/" class="btn btn-secondary btn-small">Home</a>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Question Prompt Sticker Card -->
+    <div class="question-prompt-card">
+      <div class="prompt-tag">Anonymous Prompt</div>
+      <div class="prompt-main-text"><%= question.text %></div>
+    </div>
+
+    <% if (typeof isArchived !== 'undefined' && isArchived) { %>
+      <div class="card" style="text-align: center; padding: 32px 20px;">
+        <div style="font-size: 2rem; margin-bottom: 8px;">📁</div>
+        <h3 style="font-size: 1.2rem; margin-bottom: 6px;">Question Archived</h3>
+        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 16px;">
+          This question has been archived by the creator and is no longer accepting new replies.
+        </p>
+        <a href="/" class="btn btn-primary btn-small">Browse Live Questions</a>
+      </div>
+    <% } else { %>
+      <!-- Reply Modes Container -->
+      <div class="card">
+        <div class="tab-container">
+          <button type="button" class="tab-btn active" id="tab-text" onclick="switchTab('text')">
+            💬 Text Reply
+          </button>
+          <button type="button" class="tab-btn" id="tab-voice" onclick="switchTab('voice')">
+            🎙️ Voice Reply
+          </button>
+        </div>
+
+        <!-- Text Reply Form -->
+        <div id="section-text">
+          <form action="/q/<%= question.slug %>/reply" method="POST">
+            <textarea 
+              name="content" 
+              id="text-content"
+              placeholder="Write your honest, anonymous message here..." 
+              maxlength="500" 
+              required
+              oninput="document.getElementById('char-count').textContent = this.value.length;"
+            ></textarea>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <span style="font-size: 0.8rem; color: var(--text-secondary);">
+                <span id="char-count" style="color: var(--accent); font-weight: 700;">0</span> / 500 characters
+              </span>
+              <span style="font-size: 0.8rem; color: var(--text-secondary);">Never stores IP or name</span>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.02rem; padding: 13px;">
+              Send Anonymous Message 🚀
+            </button>
+          </form>
+        </div>
+
+        <!-- Voice Reply Section -->
+        <div id="section-voice" style="display: none;">
+          <input type="hidden" id="question-slug" value="<%= question.slug %>">
+          
+          <div class="recorder-box">
+            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 2px;">Record up to 60 seconds</div>
+            <div class="timer-display" id="timer-display">00:00</div>
+            <div id="recorder-status" style="font-size: 0.85rem; color: var(--accent); min-height: 20px; margin-bottom: 10px;">
+              Tap microphone to start recording
+            </div>
+
+            <audio id="audio-preview" controls style="display: none; margin-bottom: 16px;"></audio>
+
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; align-items: center;">
+              <button type="button" class="record-btn-circle" id="btn-record" title="Start Recording">
+                🎙️
+              </button>
+              <button type="button" class="record-btn-circle recording" id="btn-stop" style="display: none;" title="Stop Recording">
+                ⏹
+              </button>
+              <button type="button" class="btn btn-secondary btn-small" id="btn-reset" style="display: none;">
+                ↺ Re-record
+              </button>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary" id="btn-submit-audio" disabled style="width: 100%; font-size: 1.02rem; padding: 13px;">
+            Send Anonymous Voice Note 🎙️
+          </button>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Featured Responses: What Others Said -->
+    <% if (featuredResponses && featuredResponses.length > 0) { %>
+      <div class="card">
+        <h3 style="margin-bottom: 14px; font-size: 1.15rem;">
+          ✨ What others said
+        </h3>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <% featuredResponses.forEach(r => { %>
+            <div class="featured-card">
+              <div class="response-header">
+                <span style="font-weight: 700; font-size: 0.82rem; color: <%= r.type === 'audio' ? '#38bdf8' : 'var(--accent)' %>">
+                  <%= r.type === 'audio' ? '🎤 Voice Response' : '💬 Anonymous Note' %>
+                </span>
+                <span style="font-size: 0.75rem;"><%= new Date(r.createdAt).toLocaleDateString() %></span>
+              </div>
+
+              <% if (r.type === 'text') { %>
+                <div class="response-content" style="font-size: 1rem;"><%= r.content %></div>
+              <% } else { %>
+                <div style="margin: 8px 0;">
+                  <audio controls preload="none" src="/api/responses/<%= r._id %>/audio"></audio>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">
+                    Duration: <%= r.audio?.durationSeconds || 0 %>s
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    <% } %>
+
+    <footer class="site-footer">
+      <div class="footer-links">
+        <span>© 2026 PsychoBandhu — Between Us</span>
+        <span>•</span>
+        <a href="/" class="footer-muted-link">Home</a>
+        <span>•</span>
+        <a href="/featured" class="footer-muted-link">Featured</a>
+        <span>•</span>
+        <a href="/admin/login" class="footer-admin-link" title="Creator Access">Admin</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/js/recorder.js"></script>
+  <script>
+    function switchTab(mode) {
+      const textSection = document.getElementById('section-text');
+      const voiceSection = document.getElementById('section-voice');
+      const tabText = document.getElementById('tab-text');
+      const tabVoice = document.getElementById('tab-voice');
+
+      if (mode === 'text') {
+        textSection.style.display = 'block';
+        voiceSection.style.display = 'none';
+        tabText.classList.add('active');
+        tabVoice.classList.remove('active');
+      } else {
+        textSection.style.display = 'none';
+        voiceSection.style.display = 'block';
+        tabText.classList.remove('active');
+        tabVoice.classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>

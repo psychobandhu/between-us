@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Answers for "<%= question.text %>" — PsychoBandhu</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <a href="/admin" class="brand">
+        <img src="/assets/logo.png" alt="PsychoBandhu" class="brand-logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <h1>PsychoBandhu</h1>
+          <div class="tagline">Admin Dashboard</div>
+        </div>
+      </a>
+      <div>
+        <a href="/admin" class="btn btn-secondary btn-small">← All Questions</a>
+      </div>
+    </header>
+
+    <!-- Question Overview Card -->
+    <div class="card">
+      <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 4px;">QUESTION PROMPT</div>
+      <h2 style="font-size: 1.3rem; margin-bottom: 8px;"><%= question.text %></h2>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">
+        Public Link: <a href="/q/<%= question.slug %>" target="_blank" style="color: var(--accent);"><%= baseUrl %>/q/<%= question.slug %></a>
+        • Status: 
+        <% if (question.isActive !== false) { %>
+          <span style="background: rgba(16, 185, 129, 0.15); color: var(--accent); border: 1px solid rgba(16, 185, 129, 0.3); padding: 1px 6px; border-radius: 10px; font-size: 0.72rem; font-weight: 700;">🟢 LIVE</span>
+        <% } else { %>
+          <span style="background: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.3); padding: 1px 6px; border-radius: 10px; font-size: 0.72rem; font-weight: 700;">📁 ARCHIVED</span>
+        <% } %>
+      </p>
+
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+        <button 
+          type="button" 
+          class="btn btn-secondary btn-small"
+          onclick="downloadQuestionCard('<%= question.text.replace(/'/g, "\\'") %>', '<%= question.slug %>')">
+          📸 Download Question Story Card
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-secondary btn-small"
+          onclick="navigator.clipboard.writeText('<%= baseUrl %>/q/<%= question.slug %>'); alert('Question link copied!');">
+          📋 Copy Public Link
+        </button>
+        <form action="/admin/questions/<%= question._id %>/toggle-active" method="POST" style="margin: 0;">
+          <button type="submit" class="btn btn-secondary btn-small">
+            <%= question.isActive !== false ? '📦 Archive Question' : '🚀 Make Live' %>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Responses List -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h2>Answers Received (<%= responses.length %>)</h2>
+          <% if (unreadCount > 0) { %>
+            <span style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 2px 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800;">
+              📬 <%= unreadCount %> UNREAD
+            </span>
+          <% } %>
+        </div>
+
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <% if (unreadCount > 0) { %>
+            <form action="/admin/questions/<%= question._id %>/mark-all-read" method="POST" style="margin: 0;">
+              <button type="submit" class="btn btn-secondary btn-small" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.3);">
+                ✓ Mark All Read
+              </button>
+            </form>
+          <% } %>
+          <button type="button" class="btn btn-secondary btn-small resp-filter active" onclick="filterResponses('all', this)">All</button>
+          <button type="button" class="btn btn-secondary btn-small resp-filter" onclick="filterResponses('unread', this)">Unread (<%= unreadCount %>)</button>
+          <button type="button" class="btn btn-secondary btn-small resp-filter" onclick="filterResponses('read', this)">Read (<%= responses.length - unreadCount %>)</button>
+        </div>
+      </div>
+
+      <% if (responses.length === 0) { %>
+        <p style="color: var(--text-secondary); text-align: center; padding: 24px 0;">
+          No answers yet. Share your story card or link on Instagram to get replies!
+        </p>
+      <% } else { %>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <% responses.forEach((r, idx) => { %>
+            <div 
+              class="response-item" 
+              id="resp-<%= r._id %>" 
+              data-read="<%= r.isRead ? 'true' : 'false' %>"
+              style="<%= !r.isRead ? 'border-left: 4px solid #38bdf8;' : '' %> <%= r.isFeatured ? 'border-color: var(--accent); background: rgba(16, 185, 129, 0.05);' : '' %>">
+              <div class="response-header">
+                <div>
+                  <span style="font-weight: 600; color: <%= r.type === 'audio' ? '#38bdf8' : 'var(--accent)' %>">
+                    <%= r.type === 'audio' ? '🎤 Voice Message' : '💬 Text Message' %>
+                  </span>
+                  <% if (!r.isRead) { %>
+                    <span style="background: #38bdf8; color: #082f49; font-size: 0.72rem; padding: 1px 6px; border-radius: 4px; font-weight: 800; margin-left: 6px;">
+                      NEW
+                    </span>
+                  <% } %>
+                  <% if (r.isFeatured) { %>
+                    <span style="background: var(--accent); color: #042f2e; font-size: 0.72rem; padding: 1px 6px; border-radius: 4px; font-weight: 700; margin-left: 6px;">
+                      FEATURED
+                    </span>
+                  <% } %>
+                </div>
+                <div>
+                  <%= new Date(r.createdAt).toLocaleDateString() %> <%= new Date(r.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                </div>
+              </div>
+
+              <% if (r.type === 'text') { %>
+                <div class="response-content"><%= r.content %></div>
+              <% } else { %>
+                <div style="margin: 10px 0;">
+                  <audio controls preload="metadata" src="/api/responses/<%= r._id %>/audio"></audio>
+                  <div style="font-size: 0.8rem; color: var(--text-secondary); display: flex; justify-content: space-between; margin-top: 4px;">
+                    <span>Duration: <%= r.audio?.durationSeconds || 0 %>s • Size: <%= ((r.audio?.sizeBytes || 0) / 1024).toFixed(1) %> KB</span>
+                    <a href="/api/responses/<%= r._id %>/audio" download="voice-reply-<%= r._id %>.webm" style="color: var(--accent); text-decoration: none;">
+                      ⬇ Download Audio
+                    </a>
+                  </div>
+                </div>
+              <% } %>
+
+              <div class="response-actions">
+                <!-- Mark Read / Unread Toggle -->
+                <button 
+                  type="button" 
+                  class="btn btn-secondary btn-small"
+                  onclick="toggleRead('<%= r._id %>')">
+                  <%= r.isRead ? '✉ Mark Unread' : '✓ Mark Read' %>
+                </button>
+
+                <!-- Feature Toggle -->
+                <button 
+                  type="button" 
+                  class="btn <%= r.isFeatured ? 'btn-primary' : 'btn-secondary' %> btn-small"
+                  onclick="toggleFeature('<%= r._id %>')">
+                  <%= r.isFeatured ? '★ Featured on Page' : '☆ Feature on Page' %>
+                </button>
+
+                <!-- Share to Story Card -->
+                <button 
+                  type="button" 
+                  class="btn btn-secondary btn-small"
+                  onclick="shareResponseCard('<%= question.text.replace(/'/g, "\\'") %>', '<%= r.type === 'audio' ? '' : r.content.replace(/'/g, "\\'").replace(/\n/g, ' ') %>', '<%= r._id %>', <%= r.type === 'audio' %>, <%= r.audio?.durationSeconds || 0 %>)">
+                  📸 Share to Story
+                </button>
+
+                <!-- Delete -->
+                <button 
+                  type="button" 
+                  class="btn btn-danger btn-small"
+                  style="margin-left: auto;"
+                  onclick="deleteResponse('<%= r._id %>')">
+                  Delete
+                </button>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Shared Hidden Story Card for html2canvas Rendering -->
+  <div id="story-card-render">
+    <div class="story-brand">
+      <img src="/assets/logo.png" class="story-logo" onerror="this.style.display='none'">
+      <div class="story-brand-info">
+        <div class="story-brand-title">PsychoBandhu</div>
+        <div class="story-brand-sub">Between Us • Anonymous Q&A</div>
+      </div>
+    </div>
+
+    <div class="story-center-container">
+      <div class="story-question-box" id="story-q-box">
+        <div class="story-box-header">
+          <span class="story-box-tag question-tag">💬 QUESTION</span>
+        </div>
+        <div class="story-question-text" id="story-question-display">
+          Question Prompt
+        </div>
+      </div>
+
+      <div class="story-connector" id="story-connector-arrow">
+        <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <polyline points="19 12 12 19 5 12"></polyline>
+        </svg>
+      </div>
+
+      <div class="story-answer-box" id="story-a-box">
+        <div class="story-box-header">
+          <span class="story-box-tag answer-tag" id="story-answer-tag">🔒 ANONYMOUS REPLY</span>
+        </div>
+        <div class="story-answer-text" id="story-answer-display">
+          Response Text
+        </div>
+      </div>
+    </div>
+
+    <div class="story-footer-card">
+      <div class="story-footer-hint">🔗 Tap the link sticker to reply on PsychoBandhu</div>
+      <div class="story-footer-brand">psychobandhu.app</div>
+    </div>
+  </div>
+
+  <script src="/js/share-card.js"></script>
+  <script>
+    function downloadQuestionCard(questionText, slug) {
+      window.generateStoryCard({
+        isResponse: false,
+        questionText: questionText,
+        slug: slug,
+        filename: `psychobandhu-${slug}-question.png`
+      });
+    }
+
+    function shareResponseCard(questionText, responseText, responseId, isAudio, audioDuration) {
+      window.generateStoryCard({
+        isResponse: true,
+        questionText: questionText,
+        responseText: responseText,
+        isAudio: isAudio,
+        audioDuration: audioDuration,
+        filename: `psychobandhu-reply-${responseId}.png`
+      });
+    }
+
+    async function toggleRead(id) {
+      try {
+        const res = await fetch(`/admin/responses/${id}/toggle-read`, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          window.location.reload();
+        } else {
+          alert('Failed to update read status');
+        }
+      } catch (err) {
+        alert('Network error');
+      }
+    }
+
+    function filterResponses(filter, btn) {
+      document.querySelectorAll('.resp-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.response-item').forEach(item => {
+        const isRead = item.dataset.read === 'true';
+        if (filter === 'all') {
+          item.style.display = 'block';
+        } else if (filter === 'unread') {
+          item.style.display = !isRead ? 'block' : 'none';
+        } else if (filter === 'read') {
+          item.style.display = isRead ? 'block' : 'none';
+        }
+      });
+    }
+
+    async function toggleFeature(id) {
+      try {
+        const res = await fetch(`/admin/responses/${id}/toggle-feature`, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          window.location.reload();
+        } else {
+          alert('Failed to toggle feature status');
+        }
+      } catch (err) {
+        alert('Network error');
+      }
+    }
+
+    async function deleteResponse(id) {
+      if (!confirm("This can't be undone. Are you sure you want to permanently delete this answer?")) {
+        return;
+      }
+      try {
+        const res = await fetch(`/admin/responses/${id}/delete`, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          const el = document.getElementById(`resp-${id}`);
+          if (el) el.remove();
+          window.location.reload();
+        } else {
+          alert('Failed to delete response');
+        }
+      } catch (err) {
+        alert('Network error');
+      }
+    }
+  </script>
+</body>
+</html>
