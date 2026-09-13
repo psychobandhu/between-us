@@ -12,27 +12,11 @@ Anonymous question and voice/text response web application built with a modern, 
 
 ---
 
-## Deploying to Vercel (Recommended)
 
-1. Push this project to a **GitHub** repository (or use the Vercel CLI: `vercel`).
-2. Import the repository into your [Vercel Dashboard](https://vercel.com).
-3. In **Settings > Environment Variables**, add:
-   - `MONGODB_URI`: `mongodb+srv://psychobandhu_db_user:ZZtfmFYCoFjOhuJt@cluster0.e2fwlox.mongodb.net/psychobandhu?appName=Cluster0`
-   - `ADMIN_PASSWORD`: `inbox@2026`
-   - `SESSION_SECRET`: `psychobandhu_secret_between_us_987654`
-4. Click **Deploy**. Vercel will build and launch the site with zero extra configuration.
 
 ---
 
-## Deploying to Replit (Single Repl)
 
-1. Create a new Node.js Repl in [Replit](https://replit.com).
-2. Upload the project files into your Repl.
-3. Open **Tools > Secrets** and add:
-   - `MONGODB_URI`: `mongodb+srv://psychobandhu_db_user:ZZtfmFYCoFjOhuJt@cluster0.e2fwlox.mongodb.net/psychobandhu?appName=Cluster0`
-   - `ADMIN_PASSWORD`: `inbox@2026`
-   - `SESSION_SECRET`: `psychobandhu_secret_between_us_987654`
-4. Click **Run**.
 
 ---
 
