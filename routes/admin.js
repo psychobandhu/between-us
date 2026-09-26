@@ -152,7 +152,14 @@ router.get('/', async (req, res) => {
     });
   } catch (err) {
     console.error('Error in admin dashboard:', err);
-    res.status(500).send('Error loading dashboard');
+    res.status(500).render('index', {
+      pageTitle: 'PsychoBandhu Admin',
+      generalQ: null,
+      activeQuestions: [],
+      countsMap: {},
+      featuredResponses: [],
+      flashMessage: 'Temporarily unable to load dashboard. Please refresh to retry.'
+    });
   }
 });
 
@@ -231,7 +238,7 @@ router.get('/questions/:id', async (req, res) => {
     });
   } catch (err) {
     console.error('Error loading question responses:', err);
-    res.status(500).send('Error loading responses');
+    res.redirect('/admin');
   }
 });
 

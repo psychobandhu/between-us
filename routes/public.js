@@ -81,7 +81,14 @@ router.get('/featured', async (req, res) => {
     });
   } catch (err) {
     console.error('Error loading featured page:', err);
-    res.status(500).send('Error loading featured responses');
+    res.status(500).render('index', {
+      pageTitle: 'PsychoBandhu',
+      generalQ: null,
+      activeQuestions: [],
+      countsMap: {},
+      featuredResponses: [],
+      flashMessage: 'Unable to load featured responses right now. Please refresh.'
+    });
   }
 });
 
@@ -113,7 +120,14 @@ router.get('/q/:slug', async (req, res) => {
     });
   } catch (err) {
     console.error('Error loading question:', err);
-    res.status(500).send('Server Error');
+    res.status(500).render('index', {
+      pageTitle: 'PsychoBandhu',
+      generalQ: null,
+      activeQuestions: [],
+      countsMap: {},
+      featuredResponses: [],
+      flashMessage: 'Temporarily unable to load this prompt. Please refresh to try again.'
+    });
   }
 });
 
