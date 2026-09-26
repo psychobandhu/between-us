@@ -17,14 +17,23 @@
         </div>
       </a>
       <span class="prompt-tag" style="margin-bottom: 0;">
-        🔒 100% Anonymous
+        <svg class="icon-svg" width="12" height="12" viewBox="0 0 24 24">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        100% Anonymous
       </span>
     </header>
 
     <% if (successMessage) { %>
       <div class="alert alert-success" style="text-align: center; padding: 24px 16px;">
-        <div style="font-size: 2.2rem; margin-bottom: 6px;">🎉</div>
-        <h3 style="margin-bottom: 4px; font-size: 1.2rem;">Message Sent!</h3>
+        <div style="margin-bottom: 8px;">
+          <svg class="icon-svg" width="36" height="36" viewBox="0 0 24 24" style="color: var(--accent);">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <h3 style="margin-bottom: 4px; font-size: 1.25rem;">Message Sent Successfully</h3>
         <p style="color: var(--text-secondary); font-size: 0.92rem;"><%= successMessage %></p>
         <div style="margin-top: 16px; display: flex; justify-content: center; gap: 10px;">
           <a href="/q/<%= question.slug %>" class="btn btn-secondary btn-small">Send Another</a>
@@ -36,22 +45,38 @@
     <!-- Question Prompt Sticker Card -->
     <div class="question-prompt-card">
       <% if (question.isGeneral || question.slug === 'general') { %>
-        <div class="prompt-tag" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">💭 Open Thoughts Inbox</div>
+        <div class="prompt-tag">
+          <svg class="icon-svg" width="13" height="13" viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          Open Thoughts Inbox
+        </div>
         <div class="prompt-main-text">Share anything on your mind</div>
         <p style="color: var(--text-secondary); font-size: 0.92rem; margin-top: 8px;">
           Send candid confessions, thoughts, or voice notes freely without answering a specific question.
         </p>
       <% } else { %>
-        <div class="prompt-tag">Anonymous Prompt</div>
+        <div class="prompt-tag">
+          <svg class="icon-svg" width="13" height="13" viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          Anonymous Prompt
+        </div>
         <div class="prompt-main-text"><%= question.text %></div>
       <% } %>
     </div>
 
     <% if (typeof isArchived !== 'undefined' && isArchived) { %>
-      <div class="card" style="text-align: center; padding: 32px 20px;">
-        <div style="font-size: 2rem; margin-bottom: 8px;">📁</div>
-        <h3 style="font-size: 1.2rem; margin-bottom: 6px;">Question Archived</h3>
-        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 16px;">
+      <div class="card" style="text-align: center; padding: 36px 20px;">
+        <div style="margin-bottom: 12px;">
+          <svg class="icon-svg" width="34" height="34" viewBox="0 0 24 24" style="color: #94a3b8;">
+            <polyline points="21 8 21 21 3 21 3 8"></polyline>
+            <rect x="1" y="3" width="22" height="5"></rect>
+            <line x1="10" y1="12" x2="14" y2="12"></line>
+          </svg>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 6px;">Question Archived</h3>
+        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 18px;">
           This question has been archived by the creator and is no longer accepting new replies.
         </p>
         <a href="/" class="btn btn-primary btn-small">Browse Live Questions</a>
@@ -61,10 +86,18 @@
       <div class="card">
         <div class="tab-container">
           <button type="button" class="tab-btn active" id="tab-text" onclick="switchTab('text')">
-            💬 Text Reply
+            <svg class="icon-svg" width="15" height="15" viewBox="0 0 24 24">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Text Reply</span>
           </button>
           <button type="button" class="tab-btn" id="tab-voice" onclick="switchTab('voice')">
-            🎙️ Voice Reply
+            <svg class="icon-svg" width="15" height="15" viewBox="0 0 24 24">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" x2="12" y1="19" y2="22"></line>
+            </svg>
+            <span>Voice Reply</span>
           </button>
         </div>
 
@@ -79,14 +112,24 @@
               required
               oninput="document.getElementById('char-count').textContent = this.value.length;"
             ></textarea>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
               <span style="font-size: 0.8rem; color: var(--text-secondary);">
-                <span id="char-count" style="color: var(--accent); font-weight: 700;">0</span> / 500 characters
+                <span id="char-count" style="color: var(--accent-sky); font-weight: 700;">0</span> / 500 characters
               </span>
-              <span style="font-size: 0.8rem; color: var(--text-secondary);">Never stores IP or name</span>
+              <span style="font-size: 0.8rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px;">
+                <svg class="icon-svg" width="12" height="12" viewBox="0 0 24 24">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                Zero IP or name logging
+              </span>
             </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.02rem; padding: 13px;">
-              Send Anonymous Message 🚀
+            <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1rem; padding: 13px;">
+              <span>Send Anonymous Message</span>
+              <svg class="icon-svg btn-arrow" width="16" height="16" viewBox="0 0 24 24">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
             </button>
           </form>
         </div>
@@ -96,48 +139,79 @@
           <input type="hidden" id="question-slug" value="<%= question.slug %>">
           
           <div class="recorder-box">
-            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 2px;">Record up to 60 seconds</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;">
+              Voice Note • Up to 60 Seconds
+            </div>
             <div class="timer-display" id="timer-display">00:00</div>
-            <div id="recorder-status" style="font-size: 0.85rem; color: var(--accent); min-height: 20px; margin-bottom: 10px;">
+            <div id="recorder-status" style="font-size: 0.85rem; color: var(--accent-sky); min-height: 20px; margin-bottom: 12px; font-weight: 600;">
               Tap microphone to start recording
             </div>
 
             <audio id="audio-preview" controls style="display: none; margin-bottom: 16px;"></audio>
 
-            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; align-items: center;">
+            <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; align-items: center;">
               <button type="button" class="record-btn-circle" id="btn-record" title="Start Recording">
-                🎙️
+                <svg class="icon-svg" width="30" height="30" viewBox="0 0 24 24" style="color: #031e1a;">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" x2="12" y1="19" y2="22"></line>
+                </svg>
               </button>
               <button type="button" class="record-btn-circle recording" id="btn-stop" style="display: none;" title="Stop Recording">
-                ⏹
+                <svg class="icon-svg" width="24" height="24" viewBox="0 0 24 24" style="color: #ffffff;">
+                  <rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor"></rect>
+                </svg>
               </button>
               <button type="button" class="btn btn-secondary btn-small" id="btn-reset" style="display: none;">
-                ↺ Re-record
+                <svg class="icon-svg" width="13" height="13" viewBox="0 0 24 24">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                  <path d="M3 3v5h5"></path>
+                </svg>
+                Re-record
               </button>
             </div>
           </div>
 
-          <button type="button" class="btn btn-primary" id="btn-submit-audio" disabled style="width: 100%; font-size: 1.02rem; padding: 13px;">
-            Send Anonymous Voice Note 🎙️
+          <button type="button" class="btn btn-primary" id="btn-submit-audio" disabled style="width: 100%; font-size: 1rem; padding: 13px;">
+            <span>Send Anonymous Voice Note</span>
+            <svg class="icon-svg btn-arrow" width="16" height="16" viewBox="0 0 24 24">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
           </button>
         </div>
       </div>
     <% } %>
 
-    <!-- Featured Responses: What Others Said -->
+    <!-- Featured Responses: Community Highlights -->
     <% if (featuredResponses && featuredResponses.length > 0) { %>
       <div class="card">
-        <h3 style="margin-bottom: 14px; font-size: 1.15rem;">
-          ✨ What others said
+        <h3 style="margin-bottom: 14px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+          <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" style="color: var(--accent-sky);">
+            <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"></path>
+          </svg>
+          Community Highlights
         </h3>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
           <% featuredResponses.forEach(r => { %>
             <div class="featured-card">
               <div class="response-header">
-                <span style="font-weight: 700; font-size: 0.82rem; color: <%= r.type === 'audio' ? '#38bdf8' : 'var(--accent)' %>">
-                  <%= r.type === 'audio' ? '🎤 Voice Response' : '💬 Anonymous Note' %>
+                <span style="font-weight: 700; font-size: 0.82rem; color: <%= r.type === 'audio' ? '#38bdf8' : 'var(--accent)' %>; display: inline-flex; align-items: center; gap: 6px;">
+                  <% if (r.type === 'audio') { %>
+                    <svg class="icon-svg" width="13" height="13" viewBox="0 0 24 24">
+                      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                      <line x1="12" x2="12" y1="19" y2="22"></line>
+                    </svg>
+                    Voice Response
+                  <% } else { %>
+                    <svg class="icon-svg" width="13" height="13" viewBox="0 0 24 24">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Anonymous Note
+                  <% } %>
                 </span>
-                <span style="font-size: 0.75rem;"><%= new Date(r.createdAt).toLocaleDateString() %></span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);"><%= new Date(r.createdAt).toLocaleDateString() %></span>
               </div>
 
               <% if (r.type === 'text') { %>
@@ -145,7 +219,7 @@
               <% } else { %>
                 <div style="margin: 8px 0;">
                   <audio controls preload="none" src="/api/responses/<%= r._id %>/audio"></audio>
-                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">
                     Duration: <%= r.audio?.durationSeconds || 0 %>s
                   </div>
                 </div>
